@@ -1,30 +1,30 @@
-import os
-
 import discord
-from discord import InputTextStyle
-from discord.ui import InputText
 
-from database import ArticleDatabase
+from views import ArticleUpload
 
 
 class WriteModal(discord.ui.Modal):
 
     def __init__(self, title):
         super().__init__(title=title)
-        self.add_item(InputText(label="Titre"))
-        self.add_item(InputText(label="Text", style=InputTextStyle.long))
+        self.add_item(discord.ui.InputText(label="Titre"))
+        self.add_item(discord.ui.InputText(
+            label="Text", style=discord.InputTextStyle.long,
+            placeholder="N'oubliez pas de sauvegarder un brouillon.")
+                      )
 
     async def callback(self, interaction: discord.Interaction):
-        database = ArticleDatabase()
-        embed = discord.Embed()
-        if os.path.isfile(f"articles/{self.children[0].value}"):
-            embed.color = 0xc90000
-            embed.description = "Un article sur ce sujet existe déjà."
-        else:
-            with open(f"articles/{self.children[0].value}", "w") as file:
-                file.write(self.children[1].value)
-            database.register_article(self.children[0].value,
-                                      interaction.user.id)
-            embed.color = 0x00c900
-            embed.description = "Votre article a été correctement enregistré."
-        await interaction.response.send_message(embed=embed)
+        embed = discord.Embed(
+            color=0x0a5060,
+            title=self.children[0].value,
+            description=self.children[1].value
+            )
+        embed.set_footer(text=interaction.user.name,
+                         icon_url=interaction.user.avatar.url)
+        await interaction.response.send_message(
+            embed=embed,
+            view=ArticleUpload(
+                self.children[0].value, self.children[1].value,
+                interaction.user.id
+                )
+            )
