@@ -1,6 +1,6 @@
 import discord
 
-from views import ArticleUpload
+from message.views import ArticleUpload
 
 
 class WriteModal(discord.ui.Modal):

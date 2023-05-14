@@ -5,8 +5,8 @@ import discord
 
 import manager
 from config import bot
-from database import ArticleDatabase
-from embeds import WelcomeConfigEmbed
+from manager import ArticleDatabase
+from message.embeds import WelcomeConfigEmbed
 
 
 class InitializeButton(discord.ui.View):
@@ -48,17 +48,17 @@ class ArticleUpload(discord.ui.View):
         if not os.path.exists(f"articles/{guild_id}"):
             os.makedirs(f"articles/{guild_id}")
         if os.path.isfile(f"articles/{guild_id}/{self.filename}"):
-            embed.color = 0xe50000
+            embed.color = 0xa20000
             embed.description = "Un article sur ce sujet existe déjà."
         else:
             with open(f"articles/{guild_id}/{self.filename}", "w") as file:
                 file.write(self.content)
             database.register_article(self.filename, self.author, guild_id)
-            embed.color = 0x00e500
+            embed.color = 0x00a200
             embed.description = "Votre article a été correctement enregistré."
-        await interaction.response.send_message(embed=embed)
         self.clear_items()
         await interaction.response.edit_message(view=self)
+        await interaction.followup.send(embed=embed)
 
     @discord.ui.button(label="Annuler", style=discord.ButtonStyle.red)
     async def cancel_callback(self, button, interaction):

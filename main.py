@@ -4,9 +4,9 @@ import discord
 
 import manager
 from config import token, bot
-from embeds import *
-from modals import WriteModal
-from views import *
+from message.embeds import *
+from message.modals import WriteModal
+from message.views import *
 
 
 @bot.event
@@ -17,7 +17,7 @@ async def on_ready():
 async def initialize_guild(ctx: discord.ApplicationContext):
     if ctx.author.guild_permissions.administrator:
         embed = WelcomeConfigEmbed()
-        view  = initialize_button(ctx.author.id, ctx.guild_id)
+        view  = InitializeButton(ctx.author.id, ctx.guild_id)
     else:
         embed = InitializeErrorEmbed()
         view  = None

@@ -1,8 +1,29 @@
 import os
-import sqlite3
+import time
+import sqlite3 as sql
 
 
-DATA_BASE = sqlite3.connect(os.path.dirname(os.path.abspath(__file__))+'/data_base.db')
+DATA_BASE = sql.connect(os.path.dirname(os.path.abspath(__file__))+'/database.db')
+
+
+class ArticleDatabase:
+
+    def __init__(self):
+        self.con = DATA_BASE
+        self.cur = self.con.cursor()
+        self.cur.execute("CREATE TABLE IF NOT EXISTS " \
+                         "article(title, author, timestamp, guild)")
+        self.con.commit()
+
+    def get_recent_articles(self):
+        res = self.cur.execute("SELECT * FROM article ORDER BY timestamp DESC")
+        return res.fetchall()[:10]
+
+    def register_article(self, title, author, guild):
+        timestamp = int(time.time())
+        self.cur.execute("INSERT INTO article " \
+                         f"VALUES (\"{title}\", {author}, {timestamp}, {guild})")
+        self.con.commit()
 
 
 def initiialize_data_base():

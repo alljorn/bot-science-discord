@@ -3,7 +3,7 @@ import os
 import discord
 import manager
 
-from database import ArticleDatabase
+from manager import ArticleDatabase
 
 
 class WelcomeConfigEmbed(discord.Embed):
@@ -14,7 +14,7 @@ class WelcomeConfigEmbed(discord.Embed):
             description=
 """Merci d'avoir ajouté Science bot au serveur !
 Pour profiter pleinement de toutes les fonctionnalités une configuration est nécessaire""",
-            color=discord.Color.from_rgb(0, 0, 255)
+            color=0x0a5865
         )
         self.add_field(
             name=
