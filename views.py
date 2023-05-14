@@ -13,10 +13,5 @@ class initialize_button(discord.ui.View):
     async def confirm_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         if interaction.user.id != self.author_id: return
         manager.add_guild(self.guild_id)
-        embed = discord.Embed(
-            title = "Félicitation !",
-            description = "Science bot est maintenant initialisé sur le serveur !",
-            color=discord.Color.from_rgb(0, 255, 0)
-        )  
         self.disable_on_timeout = False
-        await interaction.response.edit_message(embeds=[welcomeConfigEmbed(), embed], view=None)
+        await interaction.response.edit_message(embeds=[welcomeConfigEmbed(), initializeSuccesEmbed()], view=None)
