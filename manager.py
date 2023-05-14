@@ -6,9 +6,19 @@ import sqlite3
 DATA_BASE = sqlite3.connect(os.path.dirname(os.path.abspath(__file__))+'/data_base.db')
 
 
+def initiialize_data_base():
+    cursor = DATA_BASE.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS guild_config (
+            id	            INTEGER NOT NULL UNIQUE,
+            director_role	INTEGER DEFAULT NULL,
+            writter_role	INTEGER DEFAULT NULL,
+            PRIMARY KEY(id)
+        );""")
+    DATA_BASE.commit()
+
 def reinitiialize_data_base():
     cursor = DATA_BASE.cursor()
-
     cursor.execute("""DROP TABLE IF EXISTS guild_config;""")
     cursor.execute("""
         CREATE TABLE guild_config (
@@ -17,6 +27,7 @@ def reinitiialize_data_base():
             writter_role	INTEGER DEFAULT NULL,
             PRIMARY KEY(id)
         );""")
+    DATA_BASE.commit()
 
 
 
@@ -69,3 +80,5 @@ def get_writter_role(guild_id: int):
 
 if __name__=="__main__":
     reinitiialize_data_base()
+else:
+    initiialize_data_base()
