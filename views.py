@@ -1,8 +1,10 @@
 import os
+from datetime import datetime
 
 import discord
 
 import manager
+from config import bot
 from database import ArticleDatabase
 from embeds import WelcomeConfigEmbed
 
@@ -62,3 +64,25 @@ class ArticleUpload(discord.ui.View):
     async def cancel_callback(self, button, interaction):
         self.clear_items()
         await interaction.response.edit_message(view=self)
+
+
+class ArticleSelect(discord.ui.View):
+
+    database = ArticleDatabase()
+    infos = database.get_recent_articles()
+    global info_dict
+    info_dict = {info[0]: info for info in infos}
+
+    @discord.ui.select(
+        options = [discord.SelectOption(label=info[0]) for info in infos]
+        )
+    async def select_callback(self, select, interaction):
+        global info_dict
+        info = info_dict[select.values[0]]
+        with open(f"articles/{info[3]}/{info[0]}") as file:
+            text = file.read()
+        embed = discord.Embed(color=0x0a5865, title=info[0], description=text)
+        user = await bot.fetch_user(info[1])
+        embed.timestamp = datetime.fromtimestamp(info[2])
+        embed.set_footer(text=user.name, icon_url=user.avatar.url)
+        await interaction.response.send_message(embed=embed)

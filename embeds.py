@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 
 import discord
 import manager
@@ -69,17 +68,13 @@ class InitializeErrorEmbed(discord.Embed):
 class ArticleEmbed(discord.Embed):
 
     def __init__(self):
-        super().__init__(color=0x0a5060,
-                         title="Parcourez les articles du Science Bot !")
+        super().__init__(color=0x0a5865)
         database = ArticleDatabase()
         articles = database.get_recent_articles()
-        articles = [f"« {info[0]} » par <@{info[1]}> " \
-                    f"le {datetime.fromtimestamp(info[2])}"
-                    for info in articles]
         if articles:
-            self.description = "- ".join(articles)
+            self.title = "Choisissez un article :"
         else:
-            self.description = "Soyez le premier à écrire !"
+            self.title = "Soyez le premier à en écrire un !"
 
 
 class AdministratorPermissionErrorEmbed(discord.Embed):

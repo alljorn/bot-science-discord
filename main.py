@@ -24,14 +24,14 @@ async def initialize_guild(ctx: discord.ApplicationContext):
     await ctx.respond(embed=embed, view=view)
 
 
-@bot.slash_command(description="parcourez les articles du Science bot !")
+@bot.slash_command(description="Parcourez les articles du Science bot !")
 async def article(ctx: discord.ApplicationContext):
     if not manager.is_guild_exists(ctx.guild_id):
         await initialize_guild(ctx)
     else:
-        await ctx.respond(embed=ArticleEmbed())
+        await ctx.respond(embed=ArticleEmbed(), view=ArticleSelect())
 
-@bot.slash_command(name="set_director", description="définissez le rôle directeur de rédaction de ce serveur")
+@bot.slash_command(description="Définissez le rôle directeur de rédaction de ce serveur")
 async def set_director(ctx: discord.ApplicationContext, role: discord.Role):
     if not manager.is_guild_exists(ctx.guild_id):
         await initialize_guild(ctx)
@@ -42,8 +42,8 @@ async def set_director(ctx: discord.ApplicationContext, role: discord.Role):
     manager.set_director_role(ctx.guild_id, role.id)
     await ctx.respond(embed=SetDirectorSuccesEmbed(role))
 
-@bot.slash_command(name="set_writter", description="définissez le rôle redacteur de ce serveur")
-async def set_writter(ctx: discord.ApplicationContext, role: discord.Role):
+@bot.slash_command(description="Définissez le rôle redacteur de ce serveur")
+async def set_writer(ctx: discord.ApplicationContext, role: discord.Role):
     if not manager.is_guild_exists(ctx.guild_id):
         await initialize_guild(ctx)
         return
@@ -54,7 +54,7 @@ async def set_writter(ctx: discord.ApplicationContext, role: discord.Role):
     await ctx.respond(embed=SetWritterSuccesEmbed(role))
 
 
-@bot.slash_command(name="show_config", description="Affiche les paramamètres de configuration du bot")
+@bot.slash_command(description="Affiche les paramamètres de configuration du bot")
 async def show_config(ctx: discord.ApplicationContext):
     if not manager.is_guild_exists(ctx.guild_id):
         await initialize_guild(ctx)

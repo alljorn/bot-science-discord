@@ -15,7 +15,7 @@ class WriteModal(discord.ui.Modal):
 
     async def callback(self, interaction: discord.Interaction):
         embed = discord.Embed(
-            color=0x0a5060,
+            color=0x0a5865,
             title=self.children[0].value,
             description=self.children[1].value
             )
