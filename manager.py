@@ -2,7 +2,6 @@ import os
 import sqlite3
 
 
-
 DATA_BASE = sqlite3.connect(os.path.dirname(os.path.abspath(__file__))+'/data_base.db')
 
 
@@ -32,13 +31,13 @@ def get_guild_data(guild_id: int):
 
     return guild_data
 
-def add_guild(guid_id: int):
+def add_guild(guild_id: int):
     cursor = DATA_BASE
     cursor.execute(f"""
         INSERT INTO guild_config(id)
-        VALUES ({guid_id});""")
+        VALUES ({guild_id});""")
     DATA_BASE.commit()
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     reinitiialize_data_base()

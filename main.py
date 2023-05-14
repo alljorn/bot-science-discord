@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import discord
+
 import manager
 from config import token, bot
 from embeds import *
+from modals import WriteModal
 from views import *
 
 
@@ -14,26 +16,29 @@ async def on_ready():
 
 
 async def initialize_guild(ctx: discord.ApplicationContext):
-    user = await bot.fetch_user(772448700097232907)
     if ctx.author.guild_permissions.administrator:
-        embed = welcomeConfigEmbed()
+        embed = WelcomeConfigEmbed()
         view  = initialize_button(ctx.author.id, ctx.guild_id)
     else:
-        embed = initializeErrorEmbed()
+        embed = InitializeErrorEmbed()
         view  = None
     await ctx.respond(embed=embed, view=view)
 
 
-@bot.slash_command(name="article", description="parcourez les articles du Science bot !")
+@bot.slash_command(description="parcourez les articles du Science bot !")
 async def article(ctx: discord.ApplicationContext):
     if not manager.is_guild_exists(ctx.guild_id):
         await initialize_guild(ctx)
-        return
+    else:
+        embed = ArticleEmbed()
+        await ctx.respond(embed=embed)
 
-    embed = articleEmbed()
-    await ctx.respond(embed=embed)
 
-
+@bot.slash_command(description="Écrivez un article sur la science")
+async def write(ctx: discord.ApplicationContext):
+    # manque la vérification de rôle
+    modal = WriteModal("Rédaction d'un article")
+    await ctx.send_modal(modal)
 
 
 bot.run(token)
