@@ -1,14 +1,45 @@
 import os
-import sqlite3
+import time
+import sqlite3 as sql
 
 
+DATA_BASE = sql.connect(os.path.dirname(os.path.abspath(__file__))+'/database.db')
 
-DATA_BASE = sqlite3.connect(os.path.dirname(os.path.abspath(__file__))+'/data_base.db')
+
+class ArticleDatabase:
+
+    def __init__(self):
+        self.con = DATA_BASE
+        self.cur = self.con.cursor()
+        self.cur.execute("CREATE TABLE IF NOT EXISTS " \
+                         "article(title, author, timestamp, guild)")
+        self.con.commit()
+
+    def get_recent_articles(self):
+        res = self.cur.execute("SELECT * FROM article ORDER BY timestamp DESC")
+        return res.fetchall()[:10]
+
+    def register_article(self, title, author, guild):
+        timestamp = int(time.time())
+        self.cur.execute("INSERT INTO article " \
+                         f"VALUES (\"{title}\", {author}, {timestamp}, {guild})")
+        self.con.commit()
+
+
+def initiialize_data_base():
+    cursor = DATA_BASE.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS guild_config (
+            id	            INTEGER NOT NULL UNIQUE,
+            director_role	INTEGER DEFAULT NULL,
+            writter_role	INTEGER DEFAULT NULL,
+            PRIMARY KEY(id)
+        );""")
+    DATA_BASE.commit()
 
 
 def reinitiialize_data_base():
     cursor = DATA_BASE.cursor()
-
     cursor.execute("""DROP TABLE IF EXISTS guild_config;""")
     cursor.execute("""
         CREATE TABLE guild_config (
@@ -17,7 +48,7 @@ def reinitiialize_data_base():
             writter_role	INTEGER DEFAULT NULL,
             PRIMARY KEY(id)
         );""")
-
+    DATA_BASE.commit()
 
 
 def is_guild_exists(guild_id: int):
@@ -66,6 +97,7 @@ def get_writter_role(guild_id: int):
     return data[2]
 
 
-
-if __name__=="__main__":
+if __name__ == "__main__":
     reinitiialize_data_base()
+else:
+    initiialize_data_base()
