@@ -24,7 +24,7 @@ class InitializeButton(discord.ui.View):
         embed = discord.Embed(
             title = "Félicitation !",
             description = "Science bot est maintenant initialisé sur le serveur !",
-            color=0x00e500
+            color=0x008e00
         )  
         self.disable_on_timeout = False
         self.clear_items()

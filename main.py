@@ -31,6 +31,7 @@ async def article(ctx: discord.ApplicationContext):
         articles = manager.get_recent_articles()
         if articles:
             embed.title = "Choisissez un article :"
+            del ArticleSelect
             await ctx.respond(embed=embed, view=ArticleSelect())
         else:
             embed.title = "Soyez le premier à en écrire un !"
@@ -74,9 +75,8 @@ async def write(ctx: discord.ApplicationContext):
     if not manager.is_guild_exists(ctx.guild_id):
         await initialize_guild(ctx)
     else:
-        approved = (manager.get_director_role(ctx.guild_id),
-                    manager.get_writer_role(ctx.guild_id))
-        if not any(role.id in approved for role in ctx.user.roles):
+        writer_id = manager.get_writer_role(ctx.guild_id)
+        if not writer_id in [role.id for role in ctx.user.roles]:
             embed = discord.Embed(
                 color=0x8e0000, title="Permission Manquant",
                 description="Veuillez contacter un admin pour vous enregistrez " \

@@ -24,14 +24,15 @@ def initiialize_data_base():
 
 def reinitiialize_data_base():
     cursor = DATA_BASE.cursor()
-    cursor.execute("""DROP TABLE IF EXISTS guild_config;""")
-    cursor.execute("""
+    """
+    cursor.execute("DROP TABLE IF EXISTS guild_config;")
+    cursor.execute(""""""
         CREATE TABLE guild_config (
             id	                INTEGER NOT NULL UNIQUE,
             director_role	INTEGER DEFAULT NULL,
             writer_role	INTEGER DEFAULT NULL,
             PRIMARY KEY(id)
-        );""")
+        );"""
     cursor.execute("DROP TABLE IF EXISTS article")
     cursor.execute("CREATE TABLE IF NOT EXISTS " \
                    "article(title, author, timestamp, guild)")
