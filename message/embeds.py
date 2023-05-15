@@ -11,7 +11,7 @@ class WelcomeConfigEmbed(discord.Embed):
 "Bienvenu sur Science bot !",
             description=
 """Merci d'avoir ajouté le bot au serveur !
-Pour profiter pleinement de toutes les fonctionnalités, une configuration est nécessaire""",
+Pour profiter pleinement de toutes les fonctionnalités, une configuration est nécessaire.""",
             color=0x0a5865
         )
         self.add_field(
@@ -29,7 +29,8 @@ Pour profiter pleinement de toutes les fonctionnalités, une configuration est n
             value=
 """> Configurer un rôle *directeur de rédaction* 
 **effectuez la commande `set_director`**
-*ce rôle permettra à un utilisateur d'avoir une gestion complète des articles du serveur*""",
+*ce rôle permettra à un utilisateur de gérer tous articles du serveur*""",
+            inline=False
         )
         self.add_field(
             name=
@@ -51,7 +52,7 @@ class InitializeSuccesEmbed(discord.Embed):
         super().__init__(
             title = "Félicitation !",
             description = "Science bot est maintenant initialisé sur le serveur !",
-            color=discord.Color.from_rgb(0, 255, 0)
+            color=0x008e00
         )
 
 class InitializeErrorEmbed(discord.Embed):
@@ -97,16 +98,18 @@ class ShowConfigEmbed(discord.Embed):
     def __init__(self, guild: discord.Guild):
         super().__init__(
             title="Paramètres de configuration du serveur",
-            color=discord.Color.from_rgb(255, 255, 225)
+            color=0x0a5865
         )
         director_role_id = manager.get_director_role(guild.id)
         self.add_field(
             name="__rôle *directeur de rédaction*:__",
-            value=f"`{director_role_id}`: @{guild.get_role(director_role_id)}" if director_role_id is not None else "*aucun rôle défini*\n**effectuez la commande `set_director`**",
+            value=f"`{director_role_id}`: @{guild.get_role(director_role_id)}" if director_role_id is not None \
+            else "*aucun rôle défini*\n**effectuez la commande `set_director`**",
             inline=False
         )
-        writter_role_id = manager.get_writter_role(guild.id)
+        writer_role_id = manager.get_writer_role(guild.id)
         self.add_field(
             name="__rôle *rédacteur*:__",
-            value=f"`{writter_role_id}`: @{guild.get_role(writter_role_id)}" if writter_role_id is not None else "*aucun rôle défini*\n**effectuez la commande `set_writter`**"
+            value=f"`{writer_role_id}`: @{guild.get_role(writer_role_id)}" if writer_role_id is not None \
+            else "*aucun rôle défini*\n**effectuez la commande `set_writter`**"
         )
