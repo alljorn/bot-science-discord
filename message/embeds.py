@@ -1,6 +1,7 @@
 import os
 
 import discord
+
 import manager
 
 
@@ -100,16 +101,29 @@ class ShowConfigEmbed(discord.Embed):
             title="Paramètres de configuration du serveur",
             color=0x0a5865
         )
-        director_role_id = manager.get_director_role(guild.id)
+        self.guild = guild
+        self.add_director_field()
+        self.add_writer_field()
+
+    def add_director_field(self):
+        director_role_id = manager.get_director_role(self.guild.id)
+        if director_role_id:
+            director_value = f"`{director_role_id}`: <@&{director_role_id}>"
+        else:
+            director_value = "*aucun rôle défini*\n**effectuez la commande `set_director`**"
         self.add_field(
             name="__rôle *directeur de rédaction*:__",
-            value=f"`{director_role_id}`: @{guild.get_role(director_role_id)}" if director_role_id is not None \
-            else "*aucun rôle défini*\n**effectuez la commande `set_director`**",
+            value=director_value,
             inline=False
         )
-        writer_role_id = manager.get_writer_role(guild.id)
+
+    def add_writer_field(self):
+        writer_role_id = manager.get_writer_role(self.guild.id)
+        if writer_role_id:
+            writer_value = f"`{writer_role_id}`: <@&{writer_role_id}>"
+        else:
+            writer_value = "*aucun rôle défini*\n**effectuez la commande `set_writer`**"
         self.add_field(
             name="__rôle *rédacteur*:__",
-            value=f"`{writer_role_id}`: @{guild.get_role(writer_role_id)}" if writer_role_id is not None \
-            else "*aucun rôle défini*\n**effectuez la commande `set_writer`**"
+            value=writer_value
         )

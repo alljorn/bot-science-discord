@@ -74,8 +74,8 @@ async def write(ctx: discord.ApplicationContext):
     if not manager.is_guild_exists(ctx.guild_id):
         await initialize_guild(ctx)
     else:
-        approved = manager.get_director_role(ctx.guild_id) \
-                   + manager.get_writer_role(ctx.guild_id)
+        approved = (manager.get_director_role(ctx.guild_id),
+                    manager.get_writer_role(ctx.guild_id))
         if not any(role.id in approved for role in ctx.user.roles):
             embed = discord.Embed(
                 color=0x8e0000, title="Permission Manquant",

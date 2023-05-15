@@ -79,13 +79,13 @@ def set_writer_role(guild_id: int, role_id: int):
 def get_director_role(guild_id: int) -> tuple:
     cursor = DATA_BASE.cursor()
     cursor.execute(f"SELECT director_role FROM guild_config WHERE id = {guild_id}")
-    return cursor.fetchone()
+    return cursor.fetchone()[0]
 
 
 def get_writer_role(guild_id: int) -> tuple:
     cursor = DATA_BASE.cursor()
     cursor.execute(f"SELECT writer_role FROM guild_config WHERE id = {guild_id}")
-    return cursor.fetchone()
+    return cursor.fetchone()[0]
 
 
 def get_recent_articles():
