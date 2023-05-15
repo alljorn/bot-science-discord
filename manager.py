@@ -2,13 +2,16 @@
 !!! Exécuté ce fichier, réinitilisera la base de données.
 """
 
+import os, shutil
 import time
 import sqlite3 as sql
 
 DATA_BASE = sql.connect("database.db")
 
 
-def initiialize_data_base():
+def initialize_data_base():
+    try: os.mkdir('articles')
+    except FileExistsError:  pass
     cursor = DATA_BASE.cursor()
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS guild_config (
@@ -22,8 +25,10 @@ def initiialize_data_base():
     DATA_BASE.commit()
 
 
-def reinitiialize_data_base():
+def reinitialize_data_base():
+    shutil.rmtree('articles')
     cursor = DATA_BASE.cursor()
+<<<<<<< HEAD
     """
     cursor.execute("DROP TABLE IF EXISTS guild_config;")
     cursor.execute(""""""
@@ -36,7 +41,11 @@ def reinitiialize_data_base():
     cursor.execute("DROP TABLE IF EXISTS article")
     cursor.execute("CREATE TABLE IF NOT EXISTS " \
                    "article(title, author, timestamp, guild)")
+=======
+    cursor.execute("""DROP TABLE IF EXISTS guild_config;""")
+>>>>>>> 7c52d42ecdaf5d265bc7b15e36bc2f3430903924
     DATA_BASE.commit()
+    initialize_data_base()
 
 
 def is_guild_exists(guild_id: int):
@@ -104,6 +113,6 @@ def register_article(title, author, guild):
 
 
 if __name__ == "__main__":
-    reinitiialize_data_base()
+    reinitialize_data_base()
 else:
-    initiialize_data_base()
+    initialize_data_base()
