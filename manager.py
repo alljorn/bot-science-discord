@@ -1,29 +1,12 @@
+"""Une librairie pour intéragir avec la base de données.
+!!! Exécuté ce fichier, réinitilisera la base de données.
+"""
+
 import os, shutil
 import time
 import sqlite3 as sql
 
-
-DATA_BASE = sql.connect(os.path.dirname(os.path.abspath(__file__))+'/database.db')
-
-
-class ArticleDatabase:
-
-    def __init__(self):
-        self.con = DATA_BASE
-        self.cur = self.con.cursor()
-        self.cur.execute("CREATE TABLE IF NOT EXISTS " \
-                         "article(title, author, timestamp, guild)")
-        self.con.commit()
-
-    def get_recent_articles(self):
-        res = self.cur.execute("SELECT * FROM article ORDER BY timestamp DESC")
-        return res.fetchall()[:10]
-
-    def register_article(self, title, author, guild):
-        timestamp = int(time.time())
-        self.cur.execute("INSERT INTO article " \
-                         f"VALUES (\"{title}\", {author}, {timestamp}, {guild})")
-        self.con.commit()
+DATA_BASE = sql.connect("database.db")
 
 
 def initialize_data_base():
@@ -32,11 +15,13 @@ def initialize_data_base():
     cursor = DATA_BASE.cursor()
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS guild_config (
-            id	            INTEGER NOT NULL UNIQUE,
+            id	                INTEGER NOT NULL UNIQUE,
             director_role	INTEGER DEFAULT NULL,
-            writter_role	INTEGER DEFAULT NULL,
+            writer_role	        INTEGER DEFAULT NULL,
             PRIMARY KEY(id)
         );""")
+    cursor.execute("CREATE TABLE IF NOT EXISTS " \
+                         "article(title, author, timestamp, guild)")
     DATA_BASE.commit()
 
 
@@ -52,11 +37,13 @@ def is_guild_exists(guild_id: int):
     return get_guild_data(guild_id) is not None
 
 
+
 def get_guild_data(guild_id: int):
     cursor = DATA_BASE.cursor()
     response = cursor.execute(f"""SELECT * FROM guild_config WHERE id={guild_id}""")
     guild_data = response.fetchone()
     return guild_data
+
 
 def add_guild(guild_id: int):
     cursor = DATA_BASE.cursor()
@@ -64,6 +51,7 @@ def add_guild(guild_id: int):
         INSERT INTO guild_config(id)
         VALUES ({guild_id});""")
     DATA_BASE.commit()
+
 
 def set_director_role(guild_id: int, role_id: int):
     cursor = DATA_BASE.cursor()
@@ -73,25 +61,40 @@ def set_director_role(guild_id: int, role_id: int):
         WHERE id={guild_id}""")
     DATA_BASE.commit()
 
-def set_writter_role(guild_id: int, role_id: int):
+
+def set_writer_role(guild_id: int, role_id: int):
     cursor = DATA_BASE.cursor()
     cursor.execute(f"""
         UPDATE guild_config
-        SET writter_role={role_id}
+        SET writer_role={role_id}
         WHERE id={guild_id}""")
     DATA_BASE.commit()
 
-def get_director_role(guild_id: int):
-    data = get_guild_data(guild_id)
-    if data is None:
-        raise Exception("guild doesn't exist")
-    return data[1]
 
-def get_writter_role(guild_id: int):
-    data = get_guild_data(guild_id)
-    if data is None:
-        raise Exception("guild doesn't exist")
-    return data[2]
+def get_director_role(guild_id: int) -> tuple:
+    cursor = DATA_BASE.cursor()
+    cursor.execute(f"SELECT director_role FROM guild_config WHERE id = {guild_id}")
+    return cursor.fetchone()[0]
+
+
+def get_writer_role(guild_id: int) -> tuple:
+    cursor = DATA_BASE.cursor()
+    cursor.execute(f"SELECT writer_role FROM guild_config WHERE id = {guild_id}")
+    return cursor.fetchone()[0]
+
+
+def get_recent_articles():
+    cursor = DATA_BASE.cursor()
+    result = cursor.execute("SELECT * FROM article ORDER BY timestamp DESC")
+    return result.fetchall()[:10]
+
+
+def register_article(title, author, guild):
+    timestamp = int(time.time())
+    cursor = DATA_BASE.cursor()
+    cursor.execute("INSERT INTO article " \
+                   f"VALUES (\"{title}\", {author}, {timestamp}, {guild})")
+    DATA_BASE.commit()
 
 
 if __name__ == "__main__":
