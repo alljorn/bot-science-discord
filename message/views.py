@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+
 
 import discord
 
@@ -45,13 +45,13 @@ class ArticleUpload(discord.ui.View):
     async def confirm_callback(self, button, interaction):
         embed = discord.Embed()
         guild_id = interaction.guild_id
-        if not os.path.exists(f"articles/{guild_id}"):
-            os.makedirs(f"articles/{guild_id}")
-        if os.path.isfile(f"articles/{guild_id}/{self.filename}"):
+        if not os.path.exists(f"articles/{guild_id}/{self.author}"):
+            os.makedirs(f"articles/{guild_id}/{self.author}")
+        if os.path.isfile(f"articles/{guild_id}/{self.author}/{self.filename}"):
             embed.color = 0x8e0000
             embed.description = "Un article sur ce sujet existe déjà."
         else:
-            with open(f"articles/{guild_id}/{self.filename}", "w") as file:
+            with open(f"articles/{guild_id}/{self.author}/{self.filename}", "w") as file:
                 file.write(self.content)
             manager.register_article(self.filename, self.author, guild_id)
             embed.color = 0x008e00
@@ -66,21 +66,4 @@ class ArticleUpload(discord.ui.View):
         await interaction.response.edit_message(view=self)
 
 
-class ArticleSelect(discord.ui.View):
 
-    infos = manager.get_recent_articles()
-    global info_dict
-    info_dict = {info[0]: info for info in infos}
-
-    @discord.ui.select(
-        options = [discord.SelectOption(label=info[0]) for info in infos]
-        )
-    async def select_callback(self, select, interaction):
-        info = info_dict[select.values[0]]
-        with open(f"articles/{info[3]}/{info[0]}") as file:
-            text = file.read()
-        embed = discord.Embed(color=0x0a5865, title=info[0], description=text)
-        user = await bot.fetch_user(info[1])
-        embed.timestamp = datetime.fromtimestamp(info[2])
-        embed.set_footer(text=user.name, icon_url=user.avatar.url)
-        await interaction.response.send_message(embed=embed)

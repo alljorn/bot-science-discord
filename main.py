@@ -1,10 +1,11 @@
 import discord
+from datetime import datetime
 
 import manager
 from config import token, bot
 from message.embeds import *
 from message.modals import WriteModal
-from message.views import InitializeButton, ArticleSelect
+from message.views import InitializeButton
 
 
 @bot.event
@@ -31,8 +32,21 @@ async def article(ctx: discord.ApplicationContext):
         articles = manager.get_recent_articles()
         if articles:
             embed.title = "Choisissez un article :"
-            del ArticleSelect
-            await ctx.respond(embed=embed, view=ArticleSelect())
+            class ArticleSelect(discord.ui.View):
+
+                @discord.ui.select(options = [discord.SelectOption(label=info[0]) for info in manager.get_recent_articles()])
+                async def select_callback(self, select, interaction):
+                    
+                    info_dict = {info[0]: info for info in manager.get_recent_articles()}
+                    info = info_dict[select.values[0]]
+                    with open(f"articles/{info[3]}/{info[1]}/{info[0]}") as file:
+                        text = file.read()
+                    embed = discord.Embed(color=0x0a5865, title=info[0], description=text)
+                    user = await bot.fetch_user(info[1])
+                    embed.timestamp = datetime.fromtimestamp(info[2])
+                    embed.set_footer(text=user.name, icon_url=user.avatar.url)
+                    await interaction.response.send_message(embed=embed)
+            await ctx.respond(embed=embed, view=ArticleSelect(timeout=15))
         else:
             embed.title = "Soyez le premier à en écrire un !"
             await ctx.respond(embed=embed)

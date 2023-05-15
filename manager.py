@@ -20,8 +20,13 @@ def initialize_data_base():
             writer_role	        INTEGER DEFAULT NULL,
             PRIMARY KEY(id)
         );""")
-    cursor.execute("CREATE TABLE IF NOT EXISTS " \
-                         "article(title, author, timestamp, guild)")
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS article(
+            title,
+            author,
+            timestamp,
+            guild
+        );""")
     DATA_BASE.commit()
 
 
@@ -29,24 +34,13 @@ def reinitialize_data_base():
     shutil.rmtree('articles')
     cursor = DATA_BASE.cursor()
     cursor.execute("""DROP TABLE IF EXISTS guild_config;""")
-    cursor.execute("DROP TABLE IF EXISTS guild_config;")
-    cursor.execute("""
-        CREATE TABLE guild_config (
-            id	                INTEGER NOT NULL UNIQUE,
-            director_role	INTEGER DEFAULT NULL,
-            writer_role	INTEGER DEFAULT NULL,
-            PRIMARY KEY(id)
-        );""")
     cursor.execute("DROP TABLE IF EXISTS article")
-    cursor.execute("CREATE TABLE IF NOT EXISTS " \
-                   "article(title, author, timestamp, guild)")
     DATA_BASE.commit()
     initialize_data_base()
 
 
 def is_guild_exists(guild_id: int):
     return get_guild_data(guild_id) is not None
-
 
 
 def get_guild_data(guild_id: int):
