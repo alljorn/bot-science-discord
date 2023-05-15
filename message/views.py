@@ -5,7 +5,6 @@ import discord
 
 import manager
 from config import bot
-from manager import ArticleDatabase
 from message.embeds import WelcomeConfigEmbed
 
 
@@ -28,8 +27,10 @@ class InitializeButton(discord.ui.View):
             color=0x00e500
         )  
         self.disable_on_timeout = False
-        response = interaction.response
-        await response.edit_message(embeds=[WelcomeConfigEmbed(), embed])
+        self.clear_items()
+        await interaction.response.edit_message(
+            embeds=[WelcomeConfigEmbed(), embed], view=self
+            )
 
 
 class ArticleUpload(discord.ui.View):
@@ -42,19 +43,18 @@ class ArticleUpload(discord.ui.View):
 
     @discord.ui.button(label="Confirmer", style=discord.ButtonStyle.green)
     async def confirm_callback(self, button, interaction):
-        database = ArticleDatabase()
         embed = discord.Embed()
         guild_id = interaction.guild_id
         if not os.path.exists(f"articles/{guild_id}"):
             os.makedirs(f"articles/{guild_id}")
         if os.path.isfile(f"articles/{guild_id}/{self.filename}"):
-            embed.color = 0xa20000
+            embed.color = 0x8e0000
             embed.description = "Un article sur ce sujet existe déjà."
         else:
             with open(f"articles/{guild_id}/{self.filename}", "w") as file:
                 file.write(self.content)
-            database.register_article(self.filename, self.author, guild_id)
-            embed.color = 0x00a200
+            manager.register_article(self.filename, self.author, guild_id)
+            embed.color = 0x008e00
             embed.description = "Votre article a été correctement enregistré."
         self.clear_items()
         await interaction.response.edit_message(view=self)
@@ -68,8 +68,7 @@ class ArticleUpload(discord.ui.View):
 
 class ArticleSelect(discord.ui.View):
 
-    database = ArticleDatabase()
-    infos = database.get_recent_articles()
+    infos = manager.get_recent_articles()
     global info_dict
     info_dict = {info[0]: info for info in infos}
 
@@ -77,7 +76,6 @@ class ArticleSelect(discord.ui.View):
         options = [discord.SelectOption(label=info[0]) for info in infos]
         )
     async def select_callback(self, select, interaction):
-        global info_dict
         info = info_dict[select.values[0]]
         with open(f"articles/{info[3]}/{info[0]}") as file:
             text = file.read()
