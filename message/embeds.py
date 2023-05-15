@@ -111,5 +111,5 @@ class ShowConfigEmbed(discord.Embed):
         self.add_field(
             name="__rôle *rédacteur*:__",
             value=f"`{writer_role_id}`: @{guild.get_role(writer_role_id)}" if writer_role_id is not None \
-            else "*aucun rôle défini*\n**effectuez la commande `set_writter`**"
+            else "*aucun rôle défini*\n**effectuez la commande `set_writer`**"
         )
