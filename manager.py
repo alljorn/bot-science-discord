@@ -28,22 +28,18 @@ def initialize_data_base():
 def reinitialize_data_base():
     shutil.rmtree('articles')
     cursor = DATA_BASE.cursor()
-<<<<<<< HEAD
-    """
+    cursor.execute("""DROP TABLE IF EXISTS guild_config;""")
     cursor.execute("DROP TABLE IF EXISTS guild_config;")
-    cursor.execute(""""""
+    cursor.execute("""
         CREATE TABLE guild_config (
             id	                INTEGER NOT NULL UNIQUE,
             director_role	INTEGER DEFAULT NULL,
             writer_role	INTEGER DEFAULT NULL,
             PRIMARY KEY(id)
-        );"""
+        );""")
     cursor.execute("DROP TABLE IF EXISTS article")
     cursor.execute("CREATE TABLE IF NOT EXISTS " \
                    "article(title, author, timestamp, guild)")
-=======
-    cursor.execute("""DROP TABLE IF EXISTS guild_config;""")
->>>>>>> 7c52d42ecdaf5d265bc7b15e36bc2f3430903924
     DATA_BASE.commit()
     initialize_data_base()
 
