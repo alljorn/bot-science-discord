@@ -1,8 +1,12 @@
+import os
+
 import discord
 import manager
 
+from manager import ArticleDatabase
 
-class welcomeConfigEmbed(discord.Embed):
+
+class WelcomeConfigEmbed(discord.Embed):
     def __init__(self):
         super().__init__(
             title=
@@ -10,7 +14,7 @@ class welcomeConfigEmbed(discord.Embed):
             description=
 """Merci d'avoir ajouté Science bot au serveur !
 Pour profiter pleinement de toutes les fonctionnalités une configuration est nécessaire""",
-            color=discord.Color.from_rgb(0, 0, 255)
+            color=0x0a5865
         )
         self.add_field(
             name=
@@ -42,7 +46,8 @@ Pour profiter pleinement de toutes les fonctionnalités une configuration est n�
 "Profitez bien de Science bot !"
         )
 
-class initializeSuccesEmbed(discord.Embed):
+
+class InitializeSuccesEmbed(discord.Embed):
 
     def __init__(self):
         super().__init__(
@@ -51,7 +56,7 @@ class initializeSuccesEmbed(discord.Embed):
             color=discord.Color.from_rgb(0, 255, 0)
         )
 
-class initializeErrorEmbed(discord.Embed):
+class InitializeErrorEmbed(discord.Embed):
 
     def __init__(self):
         super().__init__(
@@ -59,17 +64,20 @@ class initializeErrorEmbed(discord.Embed):
             description="Science bot n'a pas été initialisé, demandez à un administreur"
         )
 
-class articleEmbed(discord.Embed):
-    def __init__(self):
-        super().__init__(
-            title="Parcourez les articles du Science bot !"
-        )
-        self.add_field(
-            name="à l'affiche:",
-            value="aucun article à l'affiche"
-        )
 
-class administratorPermissionErrorEmbed(discord.Embed):
+class ArticleEmbed(discord.Embed):
+
+    def __init__(self):
+        super().__init__(color=0x0a5865)
+        database = ArticleDatabase()
+        articles = database.get_recent_articles()
+        if articles:
+            self.title = "Choisissez un article :"
+        else:
+            self.title = "Soyez le premier à en écrire un !"
+
+
+class AdministratorPermissionErrorEmbed(discord.Embed):
 
     def __init__(self):
         super().__init__(
@@ -77,7 +85,8 @@ class administratorPermissionErrorEmbed(discord.Embed):
             description="Vous n'êtes pas autorisé à effectuer cette commande, demandez à un administreur"
         )
 
-class setDirectorSuccesEmbed(discord.Embed):
+
+class SetDirectorSuccesEmbed(discord.Embed):
 
     def __init__(self, role: discord.Role):
         super().__init__(
@@ -86,7 +95,8 @@ class setDirectorSuccesEmbed(discord.Embed):
             color=discord.Color.from_rgb(0, 255, 0)
         )
 
-class setWritterSuccesEmbed(discord.Embed):
+
+class SetWritterSuccesEmbed(discord.Embed):
 
     def __init__(self, role: discord.Role):
         super().__init__(
@@ -96,7 +106,7 @@ class setWritterSuccesEmbed(discord.Embed):
         )
 
 
-class showConfigEmbed(discord.Embed):
+class ShowConfigEmbed(discord.Embed):
 
     def __init__(self, guild: discord.Guild):
         super().__init__(
