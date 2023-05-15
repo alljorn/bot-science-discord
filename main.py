@@ -27,7 +27,14 @@ async def article(ctx: discord.ApplicationContext):
     if not manager.is_guild_exists(ctx.guild_id):
         await initialize_guild(ctx)
     else:
-        await ctx.respond(embed=ArticleEmbed(), view=ArticleSelect())
+        embed = discord.Embed(color=0x0a5865)
+        articles = manager.get_recent_articles()
+        if articles:
+            embed.title = "Choisissez un article :"
+            await ctx.respond(embed=embed, view=ArticleSelect())
+        else:
+            embed.title = "Soyez le premier à en écrire un !"
+            await ctx.respond(embed=embed)
 
 
 @bot.slash_command(description="Définissez le rôle directeur de rédaction de ce serveur")

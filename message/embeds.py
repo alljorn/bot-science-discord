@@ -63,17 +63,6 @@ class InitializeErrorEmbed(discord.Embed):
         )
 
 
-class ArticleEmbed(discord.Embed):
-
-    def __init__(self):
-        super().__init__(color=0x0a5865)
-        articles = manager.get_recent_articles()
-        if articles:
-            self.title = "Choisissez un article :"
-        else:
-            self.title = "Soyez le premier à en écrire un !"
-
-
 class AdministratorPermissionErrorEmbed(discord.Embed):
 
     def __init__(self):

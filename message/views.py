@@ -69,13 +69,14 @@ class ArticleUpload(discord.ui.View):
 class ArticleSelect(discord.ui.View):
 
     infos = manager.get_recent_articles()
-    INFO_DICT = {info[0]: info for info in infos}
+    global info_dict
+    info_dict = {info[0]: info for info in infos}
 
     @discord.ui.select(
         options = [discord.SelectOption(label=info[0]) for info in infos]
         )
     async def select_callback(self, select, interaction):
-        info = INFO_DICT[select.values[0]]
+        info = info_dict[select.values[0]]
         with open(f"articles/{info[3]}/{info[0]}") as file:
             text = file.read()
         embed = discord.Embed(color=0x0a5865, title=info[0], description=text)
