@@ -1,6 +1,5 @@
 import os
 
-
 import discord
 
 import manager
@@ -64,6 +63,4 @@ class ArticleUpload(discord.ui.View):
     async def cancel_callback(self, button, interaction):
         self.clear_items()
         await interaction.response.edit_message(view=self)
-
-
 

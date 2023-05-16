@@ -1,5 +1,6 @@
-import discord
 from datetime import datetime
+
+import discord
 
 import manager
 from config import token, bot
@@ -33,11 +34,18 @@ async def article(ctx: discord.ApplicationContext):
         if articles:
             embed.title = "Choisissez un article :"
             class ArticleSelect(discord.ui.View):
+                global info_dict
+                info_dict = {info[0]: info for info in manager.get_recent_articles()}
 
-                @discord.ui.select(options = [discord.SelectOption(label=info[0]) for info in manager.get_recent_articles()])
+                async def on_timeout(self):
+                    self.clear_items()
+                    try:
+                        await self.message.edit(view=self)
+                    except discord.HTTPException:
+                        pass
+
+                @discord.ui.select(options = [discord.SelectOption(label=info) for info in info_dict])
                 async def select_callback(self, select, interaction):
-                    
-                    info_dict = {info[0]: info for info in manager.get_recent_articles()}
                     info = info_dict[select.values[0]]
                     with open(f"articles/{info[3]}/{info[1]}/{info[0]}") as file:
                         text = file.read()
@@ -46,6 +54,7 @@ async def article(ctx: discord.ApplicationContext):
                     embed.timestamp = datetime.fromtimestamp(info[2])
                     embed.set_footer(text=user.name, icon_url=user.avatar.url)
                     await interaction.response.send_message(embed=embed)
+
             await ctx.respond(embed=embed, view=ArticleSelect(timeout=15))
         else:
             embed.title = "Soyez le premier à en écrire un !"
