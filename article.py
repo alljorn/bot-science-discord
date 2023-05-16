@@ -66,11 +66,11 @@ class Article(commands.Cog):
                         except discord.HTTPException:
                             pass
 
-                    @discord.ui.select(options = [discord.SelectOption(label=info)
+                    @discord.ui.select(options=[discord.SelectOption(label=info)
                                                   for info in info_dict])
                     async def select_callback(self, select, interaction):
                         info = info_dict[select.values[0]]
-                        with open(f"articles/{info[3]}/{info[1]}/{info[0]}") as file:
+                        with open(f"articles/{info[3]}/{info[0]}") as file:
                             text = file.read()
                         embed = discord.Embed(color=0x0a5865, title=info[0],
                                               description=text)
