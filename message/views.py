@@ -44,13 +44,13 @@ class ArticleUpload(discord.ui.View):
     async def confirm_callback(self, button, interaction):
         embed = discord.Embed()
         guild_id = interaction.guild_id
-        if not os.path.exists(f"articles/{guild_id}/{self.author}"):
-            os.makedirs(f"articles/{guild_id}/{self.author}")
-        if os.path.isfile(f"articles/{guild_id}/{self.author}/{self.filename}"):
+        if not os.path.exists(f"articles/{guild_id}/"):
+            os.makedirs(f"articles/{guild_id}/")
+        if os.path.isfile(f"articles/{guild_id}/{self.filename}"):
             embed.color = 0x8e0000
             embed.description = "Un article sur ce sujet existe déjà."
         else:
-            with open(f"articles/{guild_id}/{self.author}/{self.filename}", "w") as file:
+            with open(f"articles/{guild_id}/{self.filename}", "w") as file:
                 file.write(self.content)
             manager.register_article(self.filename, self.author, guild_id)
             embed.color = 0x008e00

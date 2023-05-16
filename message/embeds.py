@@ -98,32 +98,21 @@ class ShowConfigEmbed(discord.Embed):
 
     def __init__(self, guild: discord.Guild):
         super().__init__(
+            color=0x0a5865,
             title="Paramètres de configuration du serveur",
-            color=0x0a5865
-        )
-        self.guild = guild
-        self.add_director_field()
-        self.add_writer_field()
+            description=""
+            )
 
-    def add_director_field(self):
-        director_role_id = manager.get_director_role(self.guild.id)
+        director_role_id = manager.get_director_role(guild.id)
         if director_role_id:
-            director_value = f"`{director_role_id}`: <@&{director_role_id}>"
+            self.description += f"Rôle directeur de rédaction: <@&{director_role_id}>\n\n"
         else:
-            director_value = "*aucun rôle défini*\n**effectuez la commande `set_director`**"
-        self.add_field(
-            name="__rôle *directeur de rédaction*:__",
-            value=director_value,
-            inline=False
-        )
+            self.description += "Rôle directeur de rédaction: **aucun rôle défini**\n" \
+                                "*effectuez la commande* `/set_director`\n\n"
 
-    def add_writer_field(self):
-        writer_role_id = manager.get_writer_role(self.guild.id)
+        writer_role_id = manager.get_writer_role(guild.id)
         if writer_role_id:
-            writer_value = f"`{writer_role_id}`: <@&{writer_role_id}>"
+            self.description += f"Rôle rédacteur: <@&{writer_role_id}>"
         else:
-            writer_value = "*aucun rôle défini*\n**effectuez la commande `set_writer`**"
-        self.add_field(
-            name="__rôle *rédacteur*:__",
-            value=writer_value
-        )
+            self.description += "Rôle réacteur: *aucun rôle défini*\n" \
+                                "*effectuez la commande* `/set_writer`*"

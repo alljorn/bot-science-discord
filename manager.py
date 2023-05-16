@@ -1,4 +1,5 @@
 """Une librairie pour intéragir avec la base de données.
+
 !!! Exécuté ce fichier, réinitilisera la base de données.
 """
 
@@ -88,9 +89,10 @@ def get_writer_role(guild_id: int) -> tuple:
     return cursor.fetchone()[0]
 
 
-def get_recent_articles():
+def get_recent_articles(guild_id):
     cursor = DATA_BASE.cursor()
-    result = cursor.execute("SELECT * FROM article ORDER BY timestamp DESC")
+    result = cursor.execute(f"SELECT * FROM article WHERE guild = {guild_id} "  \
+                            "ORDER BY timestamp DESC")
     return result.fetchall()[:10]
 
 
