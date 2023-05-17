@@ -18,8 +18,22 @@ class Article(commands.Cog):
         super().__init__()
         self.bot = bot
 
+    async def guild_missing(self, ctx):
+        if not manager.is_guild_exists(ctx.guild_id):
+            if ctx.author.guild_permissions.administrator:
+                embed = WelcomeConfigEmbed()
+                view  = InitializeButton(ctx.author.id, ctx.guild_id)
+            else:
+                embed = InitializeErrorEmbed()
+                view  = None
+            await ctx.respond(embed=embed, view=view)
+            return True
+        return False
+
     @article.command(description="Trouver un article")
     async def search(self, ctx, author: discord.User):
+        if await self.guild_missing(ctx):
+            return
         cursor = manager.DATA_BASE.cursor()
         cursor.execute(f"SELECT * FROM article WHERE guild = {ctx.guild_id} " \
                        f"AND author = {author.id}")
@@ -37,55 +51,50 @@ class Article(commands.Cog):
 
     @article.command(description="Parcourez les articles du Science bot !")
     async def recent(self, ctx: discord.ApplicationContext):
-        if not manager.is_guild_exists(ctx.guild_id):
-            if ctx.author.guild_permissions.administrator:
-                embed = WelcomeConfigEmbed()
-                view  = InitializeButton(ctx.author.id, ctx.guild_id)
-            else:
-                embed = InitializeErrorEmbed()
-                view  = None
-            await ctx.respond(embed=embed, view=view)
+        if await self.guild_missing(ctx):
+            return
+        embed = discord.Embed(color=0x0a5865)
+        global articles
+        articles = manager.get_recent_articles(ctx.guild_id)
+        if articles:
+            embed.title = "Choisissez un article :"
+            class ArticleSelect(discord.ui.View):
+                global info_dict
+                info_dict = {info[0]: info for info in articles}
+
+                def __init__(self, timeout, bot):
+                    super().__init__(timeout=timeout)
+                    self.bot = bot
+
+                async def on_timeout(self):
+                    self.clear_items()
+                    try:
+                        await self.message.edit(view=self)
+                    except discord.HTTPException:
+                        pass
+
+                @discord.ui.select(options=[discord.SelectOption(label=info)
+                                              for info in info_dict])
+                async def select_callback(self, select, interaction):
+                    info = info_dict[select.values[0]]
+                    with open(f"articles/{info[3]}/{info[0]}") as file:
+                        text = file.read()
+                    embed = discord.Embed(color=0x0a5865, title=info[0],
+                                          description=text)
+                    user = await self.bot.fetch_user(info[1])
+                    embed.timestamp = datetime.fromtimestamp(info[2])
+                    embed.set_footer(text=user.name, icon_url=user.avatar.url)
+                    await interaction.response.send_message(embed=embed)
+
+            await ctx.respond(embed=embed, view=ArticleSelect(15, self.bot))
         else:
-            embed = discord.Embed(color=0x0a5865)
-            global articles
-            articles = manager.get_recent_articles(ctx.guild_id)
-            if articles:
-                embed.title = "Choisissez un article :"
-                class ArticleSelect(discord.ui.View):
-                    global info_dict
-                    info_dict = {info[0]: info for info in articles}
-
-                    def __init__(self, timeout, bot):
-                        super().__init__(timeout=timeout)
-                        self.bot = bot
-
-                    async def on_timeout(self):
-                        self.clear_items()
-                        try:
-                            await self.message.edit(view=self)
-                        except discord.HTTPException:
-                            pass
-
-                    @discord.ui.select(options=[discord.SelectOption(label=info)
-                                                  for info in info_dict])
-                    async def select_callback(self, select, interaction):
-                        info = info_dict[select.values[0]]
-                        with open(f"articles/{info[3]}/{info[0]}") as file:
-                            text = file.read()
-                        embed = discord.Embed(color=0x0a5865, title=info[0],
-                                              description=text)
-                        user = await self.bot.fetch_user(info[1])
-                        embed.timestamp = datetime.fromtimestamp(info[2])
-                        embed.set_footer(text=user.name, icon_url=user.avatar.url)
-                        await interaction.response.send_message(embed=embed)
-
-                await ctx.respond(embed=embed, view=ArticleSelect(15, self.bot))
-            else:
-                embed.title = "Soyez le premier à en écrire un !"
-                await ctx.respond(embed=embed)
+            embed.title = "Soyez le premier à en écrire un !"
+            await ctx.respond(embed=embed)
 
     @article.command(description="Lire un article")
     async def read(self, ctx: discord.ApplicationContext, title):
+        if await self.guild_missing(ctx):
+            return
         if not os.path.isfile(f"articles/{ctx.guild_id}/{title}"):
             embed = discord.Embed(
                 color=0x8e0000,
@@ -109,19 +118,18 @@ class Article(commands.Cog):
 
     @article.command(description="Écrivez un article sur la science")
     async def write(self, ctx: discord.ApplicationContext):
-        if not manager.is_guild_exists(ctx.guild_id):
-            await initialize_guild(ctx)
+        if await self.guild_missing(ctx):
+            return
+        writer_id = manager.get_writer_role(ctx.guild_id)
+        if not writer_id in [role.id for role in ctx.user.roles]:
+            embed = discord.Embed(
+                color=0x8e0000, title="Permission Manquant",
+                description="Veuillez contacter un admin pour vous enregistrez " \
+                "en tant que director ou writer sur le bot.")
+            await ctx.respond(embed=embed)
         else:
-            writer_id = manager.get_writer_role(ctx.guild_id)
-            if not writer_id in [role.id for role in ctx.user.roles]:
-                embed = discord.Embed(
-                    color=0x8e0000, title="Permission Manquant",
-                    description="Veuillez contacter un admin pour vous enregistrez " \
-                    "en tant que director ou writer sur le bot.")
-                await ctx.respond(embed=embed)
-            else:
-                modal = WriteModal("Rédaction d'un article")
-                await ctx.send_modal(modal)
+            modal = WriteModal("Rédaction d'un article")
+            await ctx.send_modal(modal)
 
 
 def setup(bot):
