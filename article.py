@@ -105,15 +105,19 @@ class Article(commands.Cog):
             cursor.execute(f"SELECT author, timestamp FROM article " \
                            f"WHERE title = \"{title}\" AND guild = {ctx.guild_id}")
             article = cursor.fetchone()
-            embed = discord.Embed(
-                color=0x005865,
-                title=title
-                )
-            with open(f"articles/{ctx.guild_id}/{title}") as file:
-                embed.description = file.read()
-            user = await self.bot.fetch_user(article[0])
-            embed.timestamp = datetime.fromtimestamp(article[1])
-            embed.set_footer(text=user.name, icon_url=user.avatar.url)
+            if article:
+                embed = discord.Embed(color=0x005865,
+                                      title=title)
+                with open(f"articles/{ctx.guild_id}/{title}") as file:
+                    embed.description = file.read()
+                user = await self.bot.fetch_user(article[0])
+                embed.timestamp = datetime.fromtimestamp(article[1])
+                embed.set_footer(text=user.name, icon_url=user.avatar.url)
+            else:
+                embed = discord.Embed(
+                    color=0x005865,
+                    description="Ancun article n'existe avec ce titre."
+                    )
         await ctx.respond(embed=embed)
 
     @article.command(description="Écrivez un article sur la science")

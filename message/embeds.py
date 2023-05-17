@@ -114,5 +114,5 @@ class ShowConfigEmbed(discord.Embed):
         if writer_role_id:
             self.description += f"Rôle rédacteur: <@&{writer_role_id}>"
         else:
-            self.description += "Rôle réacteur: *aucun rôle défini*\n" \
-                                "*effectuez la commande* `/set_writer`*"
+            self.description += "Rôle réacteur: **aucun rôle défini**\n" \
+                                "*effectuez la commande* `/set_writer`"
