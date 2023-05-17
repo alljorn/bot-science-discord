@@ -13,22 +13,16 @@ async def on_ready():
     print(f"{bot.user.name} est prêt.")
 
 
-@bot.slash_command(description="Enregistre le bot sur ce serveur (nécessaire pour les commandes /articles)")
-async def register_guild(ctx: discord.ApplicationContext):
-    if not manager.is_guild_exists(ctx.guild_id):
-        if ctx.author.guild_permissions.administrator:
-            embed = WelcomeConfigEmbed()
-            view  = InitializeButton(ctx.author.id, ctx.guild_id)
-        else:
-            embed = InitializeErrorEmbed()
-            view  = None
-        await ctx.respond(embed=embed, view=view)
+async def initialize_guild(ctx: discord.ApplicationContext):
+    if ctx.author.guild_permissions.administrator:
+        embed = WelcomeConfigEmbed()
+        view  = InitializeButton(ctx.author.id, ctx.guild_id)
     else:
-        embed = discord.Embed(color=0x005865,
-                              description="Ce serveur a déjà été enregistré.")
-        await ctx.respond(embed=embed)
+        embed = InitializeErrorEmbed()
+        view  = None
+    await ctx.respond(embed=embed, view=view)
 
-
+    
 @bot.slash_command(description="Définissez le rôle directeur de rédaction de ce serveur")
 async def set_director(ctx: discord.ApplicationContext, role: discord.Role):
     if not manager.is_guild_exists(ctx.guild_id):
