@@ -1,4 +1,5 @@
 """Une librairie pour intéragir avec la base de données.
+
 !!! Exécuté ce fichier, réinitilisera la base de données.
 """
 
@@ -76,22 +77,23 @@ def set_writer_role(guild_id: int, role_id: int):
     DATA_BASE.commit()
 
 
-def get_director_role(guild_id: int) -> tuple:
+def get_director_role(guild_id) -> int:
     cursor = DATA_BASE.cursor()
     cursor.execute(f"SELECT director_role FROM guild_config WHERE id = {guild_id}")
     return cursor.fetchone()[0]
 
 
-def get_writer_role(guild_id: int) -> tuple:
+def get_writer_role(guild_id) -> int:
     cursor = DATA_BASE.cursor()
     cursor.execute(f"SELECT writer_role FROM guild_config WHERE id = {guild_id}")
     return cursor.fetchone()[0]
 
 
-def get_recent_articles():
+def get_recent_articles(guild_id):
     cursor = DATA_BASE.cursor()
-    result = cursor.execute("SELECT * FROM article ORDER BY timestamp DESC")
-    return result.fetchall()[:10]
+    result = cursor.execute(f"SELECT * FROM article WHERE guild = {guild_id} "  \
+                            "ORDER BY timestamp DESC")
+    return result.fetchmany(size=10)
 
 
 def register_article(title, author, guild):
