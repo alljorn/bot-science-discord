@@ -18,22 +18,29 @@ class Article(commands.Cog):
         super().__init__()
         self.bot = bot
 
-    async def guild_missing(self, ctx):
-        if not manager.is_guild_exists(ctx.guild_id):
-            if ctx.author.guild_permissions.administrator:
-                embed = WelcomeConfigEmbed()
-                view  = InitializeButton(ctx.author.id, ctx.guild_id)
-            else:
-                embed = InitializeErrorEmbed()
-                view  = None
-            await ctx.respond(embed=embed, view=view)
-            return True
-        return False
+    @article.command(description="Supprimer un article")
+    async def delete(self, ctx, title):
+        if not os.path.isfile(f"articles/{ctx.guild_id}/{title}"):
+            embed = discord.Embed(
+                color=0x8e0000,
+                description="Il n'existe pas encore d'article sur ce sujet."
+                )
+            await ctx.respond(embed=embed)
+            return
+        director_id = manager.get_director_role(ctx.guild_id)
+        if not director_id in [role.id for role in ctx.user.roles]:
+            embed = discord.Embed(
+                color=0x8e0000, title="Permission Manquant",
+                description="Veuillez contacter un admin pour vous enregistrez " \
+                "en tant que director sur le bot.")
+        else:
+            os.remove(f"articles/{ctx.guild_id}/{title}")
+            embed = discord.Embed(color=0x005865,
+                                  description="L'article a bien été retiré.")
+        await ctx.respond(embed=embed)
 
     @article.command(description="Trouver un article")
     async def search(self, ctx, author: discord.User):
-        if await self.guild_missing(ctx):
-            return
         cursor = manager.DATA_BASE.cursor()
         cursor.execute(f"SELECT * FROM article WHERE guild = {ctx.guild_id} " \
                        f"AND author = {author.id}")
@@ -51,8 +58,6 @@ class Article(commands.Cog):
 
     @article.command(description="Parcourez les articles du Science bot !")
     async def recent(self, ctx: discord.ApplicationContext):
-        if await self.guild_missing(ctx):
-            return
         embed = discord.Embed(color=0x0a5865)
         global articles
         articles = manager.get_recent_articles(ctx.guild_id)
@@ -93,8 +98,6 @@ class Article(commands.Cog):
 
     @article.command(description="Lire un article")
     async def read(self, ctx: discord.ApplicationContext, title):
-        if await self.guild_missing(ctx):
-            return
         if not os.path.isfile(f"articles/{ctx.guild_id}/{title}"):
             embed = discord.Embed(
                 color=0x8e0000,
@@ -122,14 +125,12 @@ class Article(commands.Cog):
 
     @article.command(description="Écrivez un article sur la science")
     async def write(self, ctx: discord.ApplicationContext):
-        if await self.guild_missing(ctx):
-            return
         writer_id = manager.get_writer_role(ctx.guild_id)
         if not writer_id in [role.id for role in ctx.user.roles]:
             embed = discord.Embed(
                 color=0x8e0000, title="Permission Manquant",
                 description="Veuillez contacter un admin pour vous enregistrez " \
-                "en tant que director ou writer sur le bot.")
+                "en tant que writer sur le bot.")
             await ctx.respond(embed=embed)
         else:
             modal = WriteModal("Rédaction d'un article")

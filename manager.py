@@ -3,16 +3,19 @@
 !!! Exécuté ce fichier, réinitilisera la base de données.
 """
 
-import os, shutil
-import time
+import os
+import shutil
 import sqlite3 as sql
+import time
 
 DATA_BASE = sql.connect("database.db")
 
 
 def initialize_data_base():
-    try: os.mkdir('articles')
-    except FileExistsError:  pass
+    try:
+        os.mkdir('articles')
+    except FileExistsError:
+        pass
     cursor = DATA_BASE.cursor()
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS guild_config (
@@ -32,7 +35,8 @@ def initialize_data_base():
 
 
 def reinitialize_data_base():
-    shutil.rmtree('articles')
+    if os.path.isdir("articles"):
+        shutil.rmtree("articles")
     cursor = DATA_BASE.cursor()
     cursor.execute("""DROP TABLE IF EXISTS guild_config;""")
     cursor.execute("DROP TABLE IF EXISTS article")
@@ -47,8 +51,7 @@ def is_guild_exists(guild_id: int):
 def get_guild_data(guild_id: int):
     cursor = DATA_BASE.cursor()
     response = cursor.execute(f"""SELECT * FROM guild_config WHERE id={guild_id}""")
-    guild_data = response.fetchone()
-    return guild_data
+    return response.fetchone()
 
 
 def add_guild(guild_id: int):
