@@ -32,16 +32,19 @@ class Article(commands.Cog):
             embed = discord.Embed(
                 color=0x8e0000, title="Permission Manquant",
                 description="Veuillez contacter un admin pour vous enregistrez " \
-                "en tant que director sur le bot.")
+                "en tant que *director* sur le bot.")
         else:
             os.remove(f"articles/{ctx.guild_id}/{title}")
+            cursor = manager.DATABASE.cursor()
+            cursor.execute(f"DELETE FROM article WHERE title = \"{title}\"")
+            manager.DATABASE.commit()
             embed = discord.Embed(color=0x005865,
                                   description="L'article a bien été retiré.")
         await ctx.respond(embed=embed)
 
     @article.command(description="Trouver un article")
     async def search(self, ctx, author: discord.User):
-        cursor = manager.DATA_BASE.cursor()
+        cursor = manager.DATABASE.cursor()
         cursor.execute(f"SELECT * FROM article WHERE guild = {ctx.guild_id} " \
                        f"AND author = {author.id}")
         articles = cursor.fetchall()
@@ -99,7 +102,7 @@ class Article(commands.Cog):
     @article.command(description="Lire un article")
     async def read(self, ctx: discord.ApplicationContext, title):
         embed = discord.Embed(color=0x005865)
-        cursor = manager.DATA_BASE.cursor()
+        cursor = manager.DATABASE.cursor()
         cursor.execute(f"SELECT * FROM article WHERE guild = {ctx.guild_id}")
         articles = cursor.fetchall()
         if not articles:
@@ -159,7 +162,7 @@ class Article(commands.Cog):
             embed = discord.Embed(
                 color=0x8e0000, title="Permission Manquant",
                 description="Veuillez contacter un admin pour vous enregistrez " \
-                "en tant que writer sur le bot.")
+                "en tant que *writer* sur le bot.")
             await ctx.respond(embed=embed)
         else:
             modal = WriteModal("Rédaction d'un article")

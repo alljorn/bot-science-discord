@@ -8,15 +8,15 @@ import shutil
 import sqlite3 as sql
 import time
 
-DATA_BASE = sql.connect("database.db")
+DATABASE = sql.connect("database.db")
 
 
-def initialize_data_base():
+def initialize_database():
     try:
         os.mkdir('articles')
     except FileExistsError:
         pass
-    cursor = DATA_BASE.cursor()
+    cursor = DATABASE.cursor()
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS guild_config (
             id	                INTEGER NOT NULL UNIQUE,
@@ -31,17 +31,17 @@ def initialize_data_base():
             timestamp,
             guild
         );""")
-    DATA_BASE.commit()
+    DATABASE.commit()
 
 
-def reinitialize_data_base():
+def reinitialize_database():
     if os.path.isdir("articles"):
         shutil.rmtree("articles")
-    cursor = DATA_BASE.cursor()
+    cursor = DATABASE.cursor()
     cursor.execute("""DROP TABLE IF EXISTS guild_config;""")
     cursor.execute("DROP TABLE IF EXISTS article")
-    DATA_BASE.commit()
-    initialize_data_base()
+    DATABASE.commit()
+    initialize_database()
 
 
 def is_guild_exists(guild_id: int):
@@ -49,51 +49,51 @@ def is_guild_exists(guild_id: int):
 
 
 def get_guild_data(guild_id: int):
-    cursor = DATA_BASE.cursor()
+    cursor = DATABASE.cursor()
     response = cursor.execute(f"""SELECT * FROM guild_config WHERE id={guild_id}""")
     return response.fetchone()
 
 
 def add_guild(guild_id: int):
-    cursor = DATA_BASE.cursor()
+    cursor = DATABASE.cursor()
     cursor.execute(f"""
         INSERT INTO guild_config(id)
         VALUES ({guild_id});""")
-    DATA_BASE.commit()
+    DATABASE.commit()
 
 
 def set_director_role(guild_id: int, role_id: int):
-    cursor = DATA_BASE.cursor()
+    cursor = DATABASE.cursor()
     cursor.execute(f"""
         UPDATE guild_config
         SET director_role={role_id}
         WHERE id={guild_id}""")
-    DATA_BASE.commit()
+    DATABASE.commit()
 
 
 def set_writer_role(guild_id: int, role_id: int):
-    cursor = DATA_BASE.cursor()
+    cursor = DATABASE.cursor()
     cursor.execute(f"""
         UPDATE guild_config
         SET writer_role={role_id}
         WHERE id={guild_id}""")
-    DATA_BASE.commit()
+    DATABASE.commit()
 
 
 def get_director_role(guild_id) -> int:
-    cursor = DATA_BASE.cursor()
+    cursor = DATABASE.cursor()
     cursor.execute(f"SELECT director_role FROM guild_config WHERE id = {guild_id}")
     return cursor.fetchone()[0]
 
 
 def get_writer_role(guild_id) -> int:
-    cursor = DATA_BASE.cursor()
+    cursor = DATABASE.cursor()
     cursor.execute(f"SELECT writer_role FROM guild_config WHERE id = {guild_id}")
     return cursor.fetchone()[0]
 
 
 def get_recent_articles(guild_id):
-    cursor = DATA_BASE.cursor()
+    cursor = DATABASE.cursor()
     result = cursor.execute(f"SELECT * FROM article WHERE guild = {guild_id} "  \
                             "ORDER BY timestamp DESC")
     return result.fetchmany(size=10)
@@ -101,13 +101,13 @@ def get_recent_articles(guild_id):
 
 def register_article(title, author, guild):
     timestamp = int(time.time())
-    cursor = DATA_BASE.cursor()
+    cursor = DATABASE.cursor()
     cursor.execute("INSERT INTO article " \
                    f"VALUES (\"{title}\", {author}, {timestamp}, {guild})")
-    DATA_BASE.commit()
+    DATABASE.commit()
 
 
 if __name__ == "__main__":
-    reinitialize_data_base()
+    reinitialize_database()
 else:
-    initialize_data_base()
+    initialize_database()
