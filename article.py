@@ -5,9 +5,9 @@ import discord
 from discord.ext import commands
 
 import manager
+from algorithm import levenshtein_distance
 from message.embeds import *
 from message.modals import WriteModal
-from message.views import InitializeButton
 
 
 class Article(commands.Cog):
@@ -98,30 +98,59 @@ class Article(commands.Cog):
 
     @article.command(description="Lire un article")
     async def read(self, ctx: discord.ApplicationContext, title):
-        if not os.path.isfile(f"articles/{ctx.guild_id}/{title}"):
-            embed = discord.Embed(
-                color=0x8e0000,
-                description="Il n'existe pas encore d'article sur ce sujet."
-                )
+        embed = discord.Embed(color=0x005865)
+        cursor = manager.DATA_BASE.cursor()
+        cursor.execute(f"SELECT * FROM article WHERE guild = {ctx.guild_id}")
+        articles = cursor.fetchall()
+        if not articles:
+            embed.title = "Soyez le premier à en écrire un !"
+            await ctx.respond(embed=embed)
+        matched = [(levenshtein_distance(title.lower(), article[0].lower()), article) for article in articles]
+        matched.sort()
+        if matched[0][0] == 0:
+            article = matched[0][1]
+            embed.title = article[0]
+            with open(f"articles/{ctx.guild_id}/{article[0]}") as file:
+                embed.description = file.read()
+            user = await self.bot.fetch_user(article[1])
+            embed.timestamp = datetime.fromtimestamp(article[2])
+            embed.set_footer(text=user.name, icon_url=user.avatar.url)
+            await ctx.respond(embed=embed)
+            return
+        elif matched:
+            embed.title = "Choisissez un article :"
+            class ArticleSelect(discord.ui.View):
+                global info_dict
+                info_dict = {info[1][0]: info[1] for info in matched[:10]}
+
+                def __init__(self, timeout, bot):
+                    super().__init__(timeout=timeout)
+                    self.bot = bot
+
+                async def on_timeout(self):
+                    self.clear_items()
+                    try:
+                        await self.message.edit(view=self)
+                    except discord.HTTPException:
+                        pass
+
+                @discord.ui.select(options=[discord.SelectOption(label=info)
+                                              for info in info_dict])
+                async def select_callback(self, select, interaction):
+                    info = info_dict[select.values[0]]
+                    with open(f"articles/{info[3]}/{info[0]}") as file:
+                        text = file.read()
+                    embed = discord.Embed(color=0x0a5865, title=info[0],
+                                          description=text)
+                    user = await self.bot.fetch_user(info[1])
+                    embed.timestamp = datetime.fromtimestamp(info[2])
+                    embed.set_footer(text=user.name, icon_url=user.avatar.url)
+                    await interaction.response.send_message(embed=embed)
+
+            await ctx.respond(embed=embed, view=ArticleSelect(15, self.bot))
         else:
-            cursor = manager.DATA_BASE.cursor()
-            cursor.execute(f"SELECT author, timestamp FROM article " \
-                           f"WHERE title = \"{title}\" AND guild = {ctx.guild_id}")
-            article = cursor.fetchone()
-            if article:
-                embed = discord.Embed(color=0x005865,
-                                      title=title)
-                with open(f"articles/{ctx.guild_id}/{title}") as file:
-                    embed.description = file.read()
-                user = await self.bot.fetch_user(article[0])
-                embed.timestamp = datetime.fromtimestamp(article[1])
-                embed.set_footer(text=user.name, icon_url=user.avatar.url)
-            else:
-                embed = discord.Embed(
-                    color=0x005865,
-                    description="Ancun article n'existe avec ce titre."
-                    )
-        await ctx.respond(embed=embed)
+            embed.description = "Ancun article n'existe avec ce titre."
+            await ctx.respond(embed=embed)
 
     @article.command(description="Écrivez un article sur la science")
     async def write(self, ctx: discord.ApplicationContext):

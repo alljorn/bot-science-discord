@@ -3,11 +3,13 @@ import discord
 import manager
 from config import token, bot
 from message.embeds import *
-from message.views import InitializeButton
 
 
 @bot.event
 async def on_ready():
+    for guild in bot.guilds:
+        if not manager.is_guild_exists(guild.id):
+            manager.add_guild(guild.id)
     print(f"{bot.user.name} est prêt.")
 
 
@@ -17,7 +19,7 @@ async def on_guild_join(guild: discord.Guild):
         manager.add_guild(guild.id)
         for text_channel in guild.text_channels:
             if text_channel.can_send():
-                embed = WelcomeConfigEmbed()
+                embed = WelcomeEmbed()
                 await text_channel.send(embed=embed)
                 return
 
@@ -46,8 +48,5 @@ async def show_config(ctx: discord.ApplicationContext):
 
 
 if __name__ == "__main__":
-    for guild in bot.guilds:
-        if not manager.is_guild_exists(guild.id):
-            manager.add_guild(guild.id)
     bot.load_extension("article")
     bot.run(token)

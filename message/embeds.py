@@ -5,7 +5,7 @@ import discord
 import manager
 
 
-class WelcomeConfigEmbed(discord.Embed):
+class WelcomeEmbed(discord.Embed):
 
     def __init__(self):
         super().__init__(
