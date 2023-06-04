@@ -5,6 +5,11 @@ from config import token, bot
 from message.embeds import *
 from message.views import InitializeButton
 
+
+intents = discord.Intents.default()
+intents.guilds = True
+bot = discord.Bot(intents=intents)
+
 bot.load_extension("article")
 
 
